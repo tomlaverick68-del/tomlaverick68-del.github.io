@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Poptropica Loader</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+<style>
+body {
+    font-family: sans-serif;
+    text-align: center;
+    padding-top: 50px;
+}
+</style>
+</head>
+<body>
+
+<h1>Preparing Poptropica...</h1>
+<p id="status">Loading ZIP...</p>
+
+<script>
+async function startGame() {
+
+    const status = document.getElementById("status");
+
+    status.textContent = "Downloading assets...";
+
+    const response = await fetch("assets.zip");
+    const zipBlob = await response.blob();
+
+    status.textContent = "Extracting assets...";
+
+    const zip = await JSZip.loadAsync(zipBlob);
+
+    // Example: locate your main SWF
+    const swfFile = zip.file("poptropica.swf");
+
+    if (!swfFile) {
+        status.textContent = "Main SWF not found!";
+        return;
+    }
+
+    const swfBlob = await swfFile.async("blob");
+    const swfURL = URL.createObjectURL(swfBlob);
+
+    status.textContent = "Launching...";
+
+    document.body.innerHTML = `
+        <object
+            type="application/x-shockwave-flash"
+            data="${swfURL}"
+            width="100%"
+            height="100%">
+        </object>
+    `;
+}
+
+startGame();
+</script>
+
+</body>
+</html>
